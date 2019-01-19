@@ -39,8 +39,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
 
     private TextView txtView;
     private String[] ttsResult;
+    private String[] ttsWords;
+    private String[] ttsFingerSpell;
     private VideoView videoView;
     private int index = 0;
+    private int findex = 0;
+    private boolean isF = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,18 +81,18 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
                     String tmp = (result.get(0)).toLowerCase();
                     index = 0;
                     txtView.setText(tmp);
+                    ttsWords = toWords(tmp);
                     ttsResult = linkMaker(toWords(tmp));
-                    safePlayer();
-//                    playLinks(ttsResult, index);
+                    safePlayer(ttsResult,index);
                 }
                 break;
         }
     }
 
-    private void safePlayer() {
+    private void safePlayer(String[] links,int index) {
         AddressValidator addressValidator = new AddressValidator();
-        if (index < ttsResult.length) {
-            addressValidator.execute(ttsResult[index]);
+        if (index < links.length) {
+            addressValidator.execute(links[index]);
         }
     }
 
@@ -125,13 +129,30 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         return links;
     }
 
+    private String[] FingerSpellLinkMaker(String word) {
+        String[] links = new String[word.length()];
+        for (int i = 0; i < links.length; i++) {
+                links[i] = "https://www.handspeak.com/word/"+word.charAt(i)+"/"+word.charAt(i)+"-abc.mp4";
+        }
+        return links;
+    }
+
     @Override
     public void onCompletion(MediaPlayer mp) {
-        index++;
         mp.stop();
         mp.reset();
-//        playLinks(ttsResult, index);
-        safePlayer();
+        if(isF){
+            if(ttsFingerSpell.length-1 <= findex){
+                isF = false;
+                safePlayer(ttsResult,index);
+            }else{
+                findex++;
+                playLinks(ttsFingerSpell,findex);
+            }
+        }else{
+            index++;
+            safePlayer(ttsResult, index);
+        }
     }
 
     @Override
@@ -165,11 +186,22 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         protected void onPostExecute(Boolean result) {
             boolean bResponse = result;
             if (bResponse) {
-                Log.d("FUCKEDUP", "onPostExecute: "+ttsResult[index]);
-                playLinks(ttsResult, index);
+                if(isF){
+                    if(ttsFingerSpell.length <= findex){
+                        isF = false;
+                        playLinks(ttsResult,index);
+                    }else{
+                        playLinks(ttsFingerSpell,findex);
+                    }
+                }else{
+                    playLinks(ttsResult, index);
+                }
             } else {
+                isF = true;
+                findex = 0;
+                ttsFingerSpell = FingerSpellLinkMaker(ttsWords[index]);
+                playLinks(ttsFingerSpell,findex);
                 index++;
-                safePlayer();
             }
         }
     }
