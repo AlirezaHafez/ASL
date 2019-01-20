@@ -46,12 +46,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         txtView = findViewById(R.id.txtView);
         videoView = findViewById(R.id.videoView);
         dic = new ArrayList<String>();
         readDic();
-        setSupportActionBar(toolbar);
+//        setSupportActionBar(toolbar);
     }
 
     private String MakeItBold(String st) {
@@ -130,7 +130,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     }
 
     private String[] toWords(String s) {
-        String[] words = s.split("\\s+");
+        String tmp = s.replaceAll("n\'t", " not");
+        tmp = tmp.replaceAll("\'m", " am");
+        tmp = tmp.replaceAll("\'", "");
+        tmp = tmp.replaceAll("&", "and");
+        String[] words = tmp.split("\\s+");
         return words;
     }
 
