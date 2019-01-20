@@ -1,6 +1,5 @@
 package ca.ualberta.hafez.asl;
 
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -9,7 +8,6 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         switch (requestCode) {
             case 10:
                 if (resultCode == RESULT_OK && data != null) {
+                    if(videoView.isPlaying()){
+                        videoView.stopPlayback();
+                    }
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String tmp = (result.get(0)).toLowerCase();
                     index = 0;
@@ -125,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
                         String tmp = dic.get(j);
                         tmp = tmp.replaceAll("-", "");
                         if ((tmp.contains(links[i]) && links[i].length() > 3) || (links[i].contains(tmp) && tmp.length() > 3)) {
-                            links[i] = "https://www.handspeak.com/word/" + dic.get(j).charAt(0) + "/" + dic.get(j) + ".mp4";
-                            Log.d("FUCK", "linkMaker: "+i+"::"+links[i]);
+                            links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + dic.get(j) + ".mp4";
+                            break;
                         }
                     }
                 }
