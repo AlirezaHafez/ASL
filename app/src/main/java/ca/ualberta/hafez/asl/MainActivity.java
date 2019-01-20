@@ -7,35 +7,21 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -50,8 +36,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private int index = 0;
     private int findex = 0;
     private boolean isF = false;
-    String csvfileString;
-    File csvfile;
     ArrayList<String> dic;
 
     @Override
@@ -61,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         txtView = findViewById(R.id.txtView);
         videoView = findViewById(R.id.videoView);
-//        csvfileString = this.getApplicationInfo().dataDir + File.separatorChar + "dic.csv";
-//        csvfile = new File(csvfileString);
         dic = new ArrayList<String>();
         readDic();
         setSupportActionBar(toolbar);
@@ -132,15 +114,20 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private String[] linkMaker(String[] words) {
         String[] links = words;
         for (int i = 0; i < links.length; i++) {
-            links[i] = Plurals.singularize(links[i]);
             if (dic.contains(links[i])) {
                 links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + links[i] + ".mp4";
             } else {
-                for (int j = 0; j < dic.size(); j++) {
-                    String tmp = dic.get(j);
-                    tmp = tmp.replaceAll("-","");
-                    if((tmp.contains(links[i]) && links[i].length()> 3) || (links[i].contains(tmp) && tmp.length() > 3)){
-                        links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + dic.get(j) + ".mp4";
+                links[i] = Plurals.singularize(links[i]);
+                if (dic.contains(links[i])) {
+                    links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + links[i] + ".mp4";
+                } else {
+                    for (int j = 0; j < dic.size(); j++) {
+                        String tmp = dic.get(j);
+                        tmp = tmp.replaceAll("-", "");
+                        if ((tmp.contains(links[i]) && links[i].length() > 3) || (links[i].contains(tmp) && tmp.length() > 3)) {
+                            links[i] = "https://www.handspeak.com/word/" + dic.get(j).charAt(0) + "/" + dic.get(j) + ".mp4";
+                            Log.d("FUCK", "linkMaker: "+i+"::"+links[i]);
+                        }
                     }
                 }
             }
