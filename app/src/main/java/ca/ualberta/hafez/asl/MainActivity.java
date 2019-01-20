@@ -19,8 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyStore;
@@ -45,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private int index = 0;
     private int findex = 0;
     private boolean isF = false;
+    String csvfileString;
+    File csvfile;
+    ArrayList<String> dic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         txtView = findViewById(R.id.txtView);
         videoView = findViewById(R.id.videoView);
+//        csvfileString = this.getApplicationInfo().dataDir + File.separatorChar + "dic.csv";
+//        csvfile = new File(csvfileString);
+        dic = new ArrayList<String>();
+        readDic();
         setSupportActionBar(toolbar);
     }
 
@@ -83,13 +95,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
                     txtView.setText(tmp);
                     ttsWords = toWords(tmp);
                     ttsResult = linkMaker(toWords(tmp));
-                    safePlayer(ttsResult,index);
+                    safePlayer(ttsResult, index);
                 }
                 break;
         }
     }
 
-    private void safePlayer(String[] links,int index) {
+    private void safePlayer(String[] links, int index) {
         AddressValidator addressValidator = new AddressValidator();
         if (index < links.length) {
             addressValidator.execute(links[index]);
@@ -120,10 +132,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private String[] linkMaker(String[] words) {
         String[] links = words;
         for (int i = 0; i < links.length; i++) {
-            if (links[i].equals("i")) {
-                links[i] = "https://www.handspeak.com/word/i/i-abc.mp4";
-            } else {
+            links[i] = Plurals.singularize(links[i]);
+            if (dic.contains(links[i])) {
                 links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + links[i] + ".mp4";
+            } else {
+                for (int j = 0; j < dic.size(); j++) {
+                    String tmp = dic.get(j);
+                    tmp = tmp.replaceAll("-","");
+                    if((tmp.contains(links[i]) && links[i].length()> 3) || (links[i].contains(tmp) && tmp.length() > 3)){
+                        links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + dic.get(j) + ".mp4";
+                    }
+                }
             }
         }
         return links;
@@ -132,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private String[] FingerSpellLinkMaker(String word) {
         String[] links = new String[word.length()];
         for (int i = 0; i < links.length; i++) {
-                links[i] = "https://www.handspeak.com/word/"+word.charAt(i)+"/"+word.charAt(i)+"-abc.mp4";
+            links[i] = "https://www.handspeak.com/word/" + word.charAt(i) + "/" + word.charAt(i) + "-abc.mp4";
         }
         return links;
     }
@@ -141,15 +160,15 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     public void onCompletion(MediaPlayer mp) {
         mp.stop();
         mp.reset();
-        if(isF){
-            if(ttsFingerSpell.length-1 <= findex){
+        if (isF) {
+            if (ttsFingerSpell.length - 1 <= findex) {
                 isF = false;
-                safePlayer(ttsResult,index);
-            }else{
+                safePlayer(ttsResult, index);
+            } else {
                 findex++;
-                playLinks(ttsFingerSpell,findex);
+                playLinks(ttsFingerSpell, findex);
             }
-        }else{
+        } else {
             index++;
             safePlayer(ttsResult, index);
         }
@@ -186,23 +205,40 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         protected void onPostExecute(Boolean result) {
             boolean bResponse = result;
             if (bResponse) {
-                if(isF){
-                    if(ttsFingerSpell.length <= findex){
+                if (isF) {
+                    if (ttsFingerSpell.length <= findex) {
                         isF = false;
-                        playLinks(ttsResult,index);
-                    }else{
-                        playLinks(ttsFingerSpell,findex);
+                        playLinks(ttsResult, index);
+                    } else {
+                        playLinks(ttsFingerSpell, findex);
                     }
-                }else{
+                } else {
                     playLinks(ttsResult, index);
                 }
             } else {
                 isF = true;
                 findex = 0;
                 ttsFingerSpell = FingerSpellLinkMaker(ttsWords[index]);
-                playLinks(ttsFingerSpell,findex);
+                playLinks(ttsFingerSpell, findex);
                 index++;
             }
+        }
+    }
+
+
+    private void readDic() {
+        try {
+            InputStreamReader is = new InputStreamReader(getAssets()
+                    .open("dic.csv"));
+
+            BufferedReader reader = new BufferedReader(is);
+            reader.readLine();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                dic.add(line);
+            }
+        } catch (IOException e) {
+            //You'll need to add proper error handling here
         }
     }
 
