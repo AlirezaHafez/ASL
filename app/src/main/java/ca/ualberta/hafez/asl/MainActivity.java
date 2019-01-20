@@ -8,10 +8,14 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+
+import com.hanks.htextview.fall.FallTextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
     private String[] ttsWords;
     private String[] ttsFingerSpell;
     private VideoView videoView;
+    private String sentence;
+    private String word;
     private int index = 0;
     private int findex = 0;
     private boolean isF = false;
@@ -46,6 +52,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         dic = new ArrayList<String>();
         readDic();
         setSupportActionBar(toolbar);
+    }
+
+    private String MakeItBold(String st) {
+        String tmp = sentence;
+        tmp = tmp.replaceAll(st, "<b>" + st + "</b>");
+        return tmp;
     }
 
 
@@ -69,15 +81,15 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
         switch (requestCode) {
             case 10:
                 if (resultCode == RESULT_OK && data != null) {
-                    if(videoView.isPlaying()){
+                    if (videoView.isPlaying()) {
                         videoView.stopPlayback();
                     }
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    String tmp = (result.get(0)).toLowerCase();
+                    sentence = (result.get(0)).toLowerCase();
                     index = 0;
-                    txtView.setText(tmp);
-                    ttsWords = toWords(tmp);
-                    ttsResult = linkMaker(toWords(tmp));
+                    txtView.setText(sentence);
+                    ttsWords = toWords(sentence);
+                    ttsResult = linkMaker(toWords(sentence));
                     safePlayer(ttsResult, index);
                 }
                 break;
@@ -94,6 +106,16 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
 
     private void playLinks(String[] links, int i) {
         if (i < links.length) {
+            if (!isF) {
+                txtView.setText(Html.fromHtml(MakeItBold(ttsWords[i])));
+                FallTextView evaporateTextView = findViewById(R.id.logoview);
+                evaporateTextView.animateText(ttsWords[i]);
+                evaporateTextView.animate();
+            } else {
+                FallTextView evaporateTextView = findViewById(R.id.logoview);
+                evaporateTextView.animateText(String.valueOf(word.charAt(i)).toUpperCase());
+                evaporateTextView.animate();
+            }
             Uri video = Uri.parse(links[i]);
             videoView.setVideoURI(video);
 //          videoView.setZOrderOnTop(true); //Very important line, add it to Your code
@@ -125,8 +147,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
                     for (int j = 0; j < dic.size(); j++) {
                         String tmp = dic.get(j);
                         tmp = tmp.replaceAll("-", "");
+                        Log.d("FUCKED", String.valueOf(dic.size()));
                         if ((tmp.contains(links[i]) && links[i].length() > 3) || (links[i].contains(tmp) && tmp.length() > 3)) {
-                            links[i] = "https://www.handspeak.com/word/" + links[i].charAt(0) + "/" + dic.get(j) + ".mp4";
+                            links[i] = "https://www.handspeak.com/word/" + dic.get(j).charAt(0) + "/" + dic.get(j) + ".mp4";
+                            Log.d("FUCK", "linkMaker: " + links[i]);
                             break;
                         }
                     }
@@ -206,7 +230,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnPre
             } else {
                 isF = true;
                 findex = 0;
-                ttsFingerSpell = FingerSpellLinkMaker(ttsWords[index]);
+                word = ttsWords[index];
+                ttsFingerSpell = FingerSpellLinkMaker(word);
                 playLinks(ttsFingerSpell, findex);
                 index++;
             }

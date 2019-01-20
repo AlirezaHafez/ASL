@@ -4,30 +4,71 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorIconText"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    android:background="@color/black"
     tools:showIn="@layout/activity_main">
+
+    <com.hanks.htextview.fall.FallTextView
+        android:id="@+id/logoview"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_margin="0dp"
+        android:gravity="center"
+        android:padding="2dp"
+        android:text="@string/app_name"
+        android:textSize="40sp"
+        app:layout_constraintBottom_toTopOf="@id/videoView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <VideoView
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:scaleType="center"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="240sp"
+        app:layout_constraintBottom_toTopOf="@id/txtView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoview" />
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="200dp"
+        android:layout_height="1dp"
+        android:layout_margin="0dp"
+        app:layout_constraintBottom_toTopOf="@id/txtView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/videoView"
+        android:background="?android:attr/listDivider" />
 
     <TextView
         android:id="@+id/txtView"
         android:layout_width="wrap_content"
-        android:layout_height="200dp"
+        android:layout_height="80dp"
+        android:gravity="center|clip_horizontal"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Tap the Mic Button and Say something!"
+        android:textColor="@color/colorText"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@id/divider2"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:textColor="@color/white"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/videoView"
-        android:text="Hello World!" />
+        app:layout_constraintTop_toBottomOf="@id/videoView" />
 
-    <VideoView
-        android:id="@+id/videoView"
-        android:layout_width="320dp"
-        android:layout_height="240dp"
-        android:layout_marginBottom="150dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="250dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtView" />
+        app:layout_constraintTop_toBottomOf="@id/txtView"/>
+
 
 </android.support.constraint.ConstraintLayout>
